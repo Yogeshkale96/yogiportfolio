@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="lbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1e1b4b"/>
+      <stop offset="1" stop-color="#4c1d95"/>
+    </linearGradient>
+    <linearGradient id="lacc" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#d946ef"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#lbg)"/>
+  <circle cx="640" cy="120" r="160" fill="#8b5cf6" opacity="0.25"/>
+  <circle cx="160" cy="380" r="140" fill="#d946ef" opacity="0.18"/>
+
+  <!-- Map pin -->
+  <g transform="translate(400 200)">
+    <path d="M0 -80 C40 -80 70 -50 70 -10 C70 40 0 90 0 90 C0 90 -70 40 -70 -10 C-70 -50 -40 -80 0 -80 Z" fill="url(#lacc)" opacity="0.9"/>
+    <circle cx="0" cy="-20" r="22" fill="#0f0f1a"/>
+    <circle cx="0" cy="-20" r="10" fill="url(#lacc)"/>
+  </g>
+
+  <!-- Service cards -->
+  <rect x="120" y="300" width="160" height="90" rx="12" fill="#0f0f1a" stroke="#ffffff20"/>
+  <rect x="120" y="300" width="160" height="28" rx="12" fill="url(#lacc)"/>
+  <rect x="120" y="316" width="160" height="12" fill="url(#lacc)"/>
+  <text x="200" y="319" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">Plumber</text>
+  <rect x="140" y="345" width="120" height="8" rx="4" fill="#ffffff30"/>
+  <rect x="140" y="360" width="80" height="8" rx="4" fill="#ffffff20"/>
+
+  <rect x="320" y="300" width="160" height="90" rx="12" fill="#0f0f1a" stroke="#ffffff20"/>
+  <rect x="320" y="300" width="160" height="28" rx="12" fill="url(#lacc)"/>
+  <rect x="320" y="316" width="160" height="12" fill="url(#lacc)"/>
+  <text x="400" y="319" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">Electrician</text>
+  <rect x="340" y="345" width="120" height="8" rx="4" fill="#ffffff30"/>
+  <rect x="340" y="360" width="90" height="8" rx="4" fill="#ffffff20"/>
+
+  <rect x="520" y="300" width="160" height="90" rx="12" fill="#0f0f1a" stroke="#ffffff20"/>
+  <rect x="520" y="300" width="160" height="28" rx="12" fill="url(#lacc)"/>
+  <rect x="520" y="316" width="160" height="12" fill="url(#lacc)"/>
+  <text x="600" y="319" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">Cleaning</text>
+  <rect x="540" y="345" width="120" height="8" rx="4" fill="#ffffff30"/>
+  <rect x="540" y="360" width="70" height="8" rx="4" fill="#ffffff20"/>
+
+  <!-- Location dots -->
+  <circle cx="180" cy="420" r="6" fill="url(#lacc)"/>
+  <circle cx="320" cy="420" r="6" fill="url(#lacc)"/>
+  <circle cx="480" cy="420" r="6" fill="url(#lacc)"/>
+  <circle cx="620" cy="420" r="6" fill="url(#lacc)"/>
+  <path d="M180 420 L620 420" stroke="url(#lacc)" stroke-width="2" stroke-dasharray="6 6" opacity="0.5"/>
+</svg>

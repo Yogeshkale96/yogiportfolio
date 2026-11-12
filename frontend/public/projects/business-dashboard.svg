@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1e1b4b"/>
+      <stop offset="1" stop-color="#4c1d95"/>
+    </linearGradient>
+    <linearGradient id="bacc" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#d946ef"/>
+    </linearGradient>
+    <linearGradient id="bar1" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#d946ef"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bbg)"/>
+  <circle cx="640" cy="120" r="160" fill="#8b5cf6" opacity="0.25"/>
+  <circle cx="160" cy="380" r="140" fill="#d946ef" opacity="0.18"/>
+
+  <!-- Dashboard frame -->
+  <rect x="120" y="80" width="560" height="340" rx="16" fill="#0f0f1a" stroke="#ffffff20"/>
+  <rect x="120" y="80" width="560" height="44" rx="16" fill="#ffffff08"/>
+  <rect x="120" y="110" width="560" height="14" fill="#ffffff08"/>
+  <circle cx="145" cy="102" r="5" fill="#f43f5e"/>
+  <circle cx="165" cy="102" r="5" fill="#fbbf24"/>
+  <circle cx="185" cy="102" r="5" fill="#34d399"/>
+
+  <!-- Stat cards -->
+  <rect x="145" y="145" width="160" height="70" rx="10" fill="#ffffff06" stroke="#ffffff14"/>
+  <text x="160" y="170" font-family="Segoe UI, sans-serif" font-size="11" fill="#ffffff99">Orders</text>
+  <text x="160" y="200" font-family="Segoe UI, sans-serif" font-size="22" font-weight="700" fill="#ffffff">1,284</text>
+  <rect x="265" y="180" width="30" height="20" rx="4" fill="url(#bacc)"/>
+
+  <rect x="320" y="145" width="160" height="70" rx="10" fill="#ffffff06" stroke="#ffffff14"/>
+  <text x="335" y="170" font-family="Segoe UI, sans-serif" font-size="11" fill="#ffffff99">Revenue</text>
+  <text x="335" y="200" font-family="Segoe UI, sans-serif" font-size="22" font-weight="700" fill="#ffffff">₹84k</text>
+  <rect x="440" y="180" width="30" height="20" rx="4" fill="url(#bacc)"/>
+
+  <rect x="495" y="145" width="160" height="70" rx="10" fill="#ffffff06" stroke="#ffffff14"/>
+  <text x="510" y="170" font-family="Segoe UI, sans-serif" font-size="11" fill="#ffffff99">Products</text>
+  <text x="510" y="200" font-family="Segoe UI, sans-serif" font-size="22" font-weight="700" fill="#ffffff">312</text>
+  <rect x="615" y="180" width="30" height="20" rx="4" fill="url(#bacc)"/>
+
+  <!-- Bar chart -->
+  <rect x="145" y="240" width="330" height="160" rx="10" fill="#ffffff06" stroke="#ffffff14"/>
+  <text x="160" y="265" font-family="Segoe UI, sans-serif" font-size="11" fill="#ffffff99">Sales Overview</text>
+  <g>
+    <rect x="170" y="350" width="28" height="35" rx="4" fill="url(#bar1)" opacity="0.6"/>
+    <rect x="210" y="330" width="28" height="55" rx="4" fill="url(#bar1)" opacity="0.7"/>
+    <rect x="250" y="300" width="28" height="85" rx="4" fill="url(#bar1)" opacity="0.8"/>
+    <rect x="290" y="320" width="28" height="65" rx="4" fill="url(#bar1)" opacity="0.7"/>
+    <rect x="330" y="285" width="28" height="100" rx="4" fill="url(#bar1)" opacity="0.9"/>
+    <rect x="370" y="310" width="28" height="75" rx="4" fill="url(#bar1)" opacity="0.8"/>
+    <rect x="410" y="270" width="28" height="115" rx="4" fill="url(#bar1)"/>
+  </g>
+
+  <!-- Donut / progress -->
+  <rect x="495" y="240" width="160" height="160" rx="10" fill="#ffffff06" stroke="#ffffff14"/>
+  <text x="510" y="265" font-family="Segoe UI, sans-serif" font-size="11" fill="#ffffff99">Growth</text>
+  <circle cx="575" cy="325" r="42" fill="none" stroke="#ffffff14" stroke-width="10"/>
+  <circle cx="575" cy="325" r="42" fill="none" stroke="url(#bacc)" stroke-width="10" stroke-dasharray="180 264" stroke-linecap="round" transform="rotate(-90 575 325)"/>
+  <text x="575" y="332" font-family="Segoe UI, sans-serif" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">68%</text>
+</svg>

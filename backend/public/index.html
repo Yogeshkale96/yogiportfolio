@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>YSK Portfolio — Admin Dashboard</title>
+<style>
+  :root {
+    --bg: #090909;
+    --card: #0d0d0d;
+    --primary: #8B5CF6;
+    --secondary: #A855F7;
+    --accent: #EC4899;
+    --muted: #A1A1AA;
+    --border: rgba(255,255,255,0.08);
+    --green: #34d399;
+    --red: #f43f5e;
+    --yellow: #fbbf24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: #fff;
+    min-height: 100vh;
+  }
+  /* ===== LOGIN ===== */
+  #loginScreen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: radial-gradient(circle at 30% 20%, rgba(139,92,246,0.08), transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(236,72,153,0.06), transparent 50%);
+  }
+  .login-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 32px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .login-card h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .login-card p { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+  .form-group { margin-bottom: 18px; }
+  .form-group label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+  .form-group input {
+    width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 15px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .form-group input:focus { border-color: var(--primary); }
+  .btn {
+    width: 100%;
+    height: 48px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .login-error {
+    color: var(--red);
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+  }
+  .login-hint {
+    margin-top: 20px;
+    padding: 14px;
+    background: rgba(139,92,246,0.08);
+    border: 1px solid rgba(139,92,246,0.2);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .login-hint code {
+    color: var(--primary);
+    background: rgba(139,92,246,0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* ===== DASHBOARD ===== */
+  #dashboard { display: none; }
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(9,9,9,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .topbar h2 {
+    font-size: 20px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .badge-admin {
+    padding: 6px 14px;
+    background: rgba(139,92,246,0.1);
+    border: 1px solid rgba(139,92,246,0.2);
+    border-radius: 20px;
+    font-size: 13px;
+    color: var(--primary);
+  }
+  .btn-logout {
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-logout:hover { color: #fff; border-color: var(--red); }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+
+  /* Stats cards */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    transition: border 0.2s;
+  }
+  .stat-card:hover { border-color: rgba(139,92,246,0.3); }
+  .stat-card .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .stat-card .value { font-size: 32px; font-weight: 700; margin-top: 8px; }
+  .stat-card.total .value { color: #fff; }
+  .stat-card.project .value { color: #8B5CF6; }
+  .stat-card.freelance .value { color: #A855F7; }
+  .stat-card.consultation .value { color: #EC4899; }
+  .stat-card.other .value { color: #F472B6; }
+  .stat-card.new .value { color: var(--green); }
+
+  /* Filters */
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .filter-btn {
+    padding: 9px 18px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { color: #fff; border-color: rgba(139,92,246,0.3); }
+  .filter-btn.active {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff;
+    border-color: transparent;
+  }
+
+  /* Inquiry list */
+  .inquiry-list { display: flex; flex-direction: column; gap: 14px; }
+  .inquiry-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .inquiry-card:hover { border-color: rgba(139,92,246,0.3); transform: translateY(-2px); }
+  .inquiry-header { display: flex; justify-content: space-between; align-items: start; gap: 12px; flex-wrap: wrap; }
+  .inquiry-name { font-size: 17px; font-weight: 600; }
+  .inquiry-email { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .type-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .type-project { background: rgba(139,92,246,0.15); color: #A78BFA; }
+  .type-freelance { background: rgba(168,85,247,0.15); color: #C084FC; }
+  .type-consultation { background: rgba(236,72,153,0.15); color: #F472B6; }
+  .type-other { background: rgba(244,114,182,0.15); color: #F9A8D4; }
+
+  .status-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .status-new { background: rgba(52,211,153,0.15); color: var(--green); }
+  .status-read { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .status-replied { background: rgba(139,92,246,0.15); color: var(--primary); }
+  .status-archived { background: rgba(161,161,170,0.15); color: var(--muted); }
+
+  .inquiry-meta { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 14px; font-size: 13px; color: var(--muted); }
+  .inquiry-meta span { display: flex; align-items: center; gap: 6px; }
+  .inquiry-date { font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+  .inquiry-message {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 14px;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.6;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    width: 100%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+  }
+  .modal h3 { font-size: 22px; margin-bottom: 6px; }
+  .modal .close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 18px;
+  }
+  .detail-row { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .detail-row .key { width: 140px; color: var(--muted); font-size: 13px; flex-shrink: 0; }
+  .detail-row .val { font-size: 14px; color: #fff; flex: 1; }
+  .status-select {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .status-select button {
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .status-select button:hover { color: #fff; }
+  .status-select button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .delete-btn {
+    margin-top: 16px;
+    width: 100%;
+    padding: 12px;
+    background: rgba(244,63,94,0.1);
+    border: 1px solid rgba(244,63,94,0.2);
+    border-radius: 10px;
+    color: var(--red);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .delete-btn:hover { background: rgba(244,63,94,0.2); }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .loading { text-align: center; padding: 40px; color: var(--muted); }
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 640px) {
+    .container { padding: 20px 16px; }
+    .stat-card .value { font-size: 26px; }
+    .detail-row { flex-direction: column; gap: 4px; }
+    .detail-row .key { width: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>Admin Dashboard</h1>
+    <p>Sign in to view contact form inquiries</p>
+    <form id="loginForm">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="admin" required autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn btn-primary" id="loginBtn">Sign In</button>
+      <div class="login-error" id="loginError">Invalid username or password</div>
+    </form>
+    <div class="login-hint">
+      <strong>Default credentials:</strong><br />
+      Username: <code>admin</code> &nbsp; Password: <code>admin123</code><br />
+      <small>Run <code>npm run seed</code> to reset</small>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="dashboard">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h2>YSK Inquiries Dashboard</h2>
+    </div>
+    <div class="topbar-right">
+      <span class="badge-admin" id="adminBadge">admin</span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card total"><div class="label">Total Inquiries</div><div class="value" id="statTotal">0</div></div>
+      <div class="stat-card project"><div class="label">Project</div><div class="value" id="statProject">0</div></div>
+      <div class="stat-card freelance"><div class="label">Freelance</div><div class="value" id="statFreelance">0</div></div>
+      <div class="stat-card consultation"><div class="label">Consultation</div><div class="value" id="statConsultation">0</div></div>
+      <div class="stat-card other"><div class="label">Other</div><div class="value" id="statOther">0</div></div>
+      <div class="stat-card new"><div class="label">New</div><div class="value" id="statNew">0</div></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-type="all">All</button>
+      <button class="filter-btn" data-type="project">Project</button>
+      <button class="filter-btn" data-type="freelance">Freelance</button>
+      <button class="filter-btn" data-type="consultation">Consultation</button>
+      <button class="filter-btn" data-type="other">Other</button>
+    </div>
+
+    <!-- Inquiry list -->
+    <div id="inquiryList" class="inquiry-list">
+      <div class="loading"><div class="spinner"></div>Loading inquiries...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DETAIL MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent">
+    <button class="close-btn" onclick="closeModal()">&times;</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin;
+let token = localStorage.getItem('ysk_admin_token');
+let currentFilter = 'all';
+let allInquiries = [];
+
+// ===== LOGIN =====
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginError');
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+  err.style.display = 'none';
+
+  try {
+    const res = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+
+    token = data.token;
+    localStorage.setItem('ysk_admin_token', token);
+    showDashboard(data.admin.username);
+  } catch (err2) {
+    err.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+});
+
+// ===== SHOW DASHBOARD =====
+async function showDashboard(username) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('adminBadge').textContent = username || 'admin';
+  await loadStats();
+  await loadInquiries();
+}
+
+// ===== LOGOUT =====
+function logout() {
+  localStorage.removeItem('ysk_admin_token');
+  token = null;
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('password').value = '';
+}
+
+// ===== LOAD STATS =====
+async function loadStats() {
+  try {
+    const res = await fetch(`${API}/api/inquiries/stats`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+
+    document.getElementById('statTotal').textContent = data.total;
+    const typeMap = {};
+    data.byType.forEach(t => typeMap[t.inquiry_type] = t.count);
+    document.getElementById('statProject').textContent = typeMap.project || 0;
+    document.getElementById('statFreelance').textContent = typeMap.freelance || 0;
+    document.getElementById('statConsultation').textContent = typeMap.consultation || 0;
+    document.getElementById('statOther').textContent = typeMap.other || 0;
+    const statusMap = {};
+    data.byStatus.forEach(s => statusMap[s.status] = s.count);
+    document.getElementById('statNew').textContent = statusMap.new || 0;
+  } catch (e) { console.error('Stats error:', e); }
+}
+
+// ===== LOAD INQUIRIES =====
+async function loadInquiries() {
+  const list = document.getElementById('inquiryList');
+  list.innerHTML = '<div class="loading"><div class="spinner"></div>Loading inquiries...</div>';
+
+  try {
+    const url = currentFilter === 'all'
+      ? `${API}/api/inquiries`
+      : `${API}/api/inquiries?type=${currentFilter}`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    allInquiries = data.inquiries;
+    renderInquiries(allInquiries);
+  } catch (e) {
+    list.innerHTML = '<div class="empty-state">Failed to load inquiries</div>';
+  }
+}
+
+// ===== RENDER INQUIRIES =====
+function renderInquiries(items) {
+  const list = document.getElementById('inquiryList');
+  if (!items.length) {
+    list.innerHTML = '<div class="empty-state">No inquiries found in this category.</div>';
+    return;
+  }
+  list.innerHTML = items.map(i => `
+    <div class="inquiry-card" onclick="openInquiry(${i.id})">
+      <div class="inquiry-header">
+        <div>
+          <div class="inquiry-name">${esc(i.name)}</div>
+          <div class="inquiry-email">${esc(i.email)}${i.phone ? ' • ' + esc(i.phone) : ''}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="type-badge type-${i.inquiry_type}">${i.inquiry_type}</span>
+          <span class="status-badge status-${i.status}">${i.status}</span>
+        </div>
+      </div>
+      ${i.company ? `<div class="inquiry-meta"><span>Company: ${esc(i.company)}</span></div>` : ''}
+      ${i.project_type ? `<div class="inquiry-meta"><span>Project: ${esc(i.project_type)}</span><span>Budget: ${esc(i.budget||'-')}</span><span>Timeline: ${esc(i.timeline||'-')}</span></div>` : ''}
+      ${i.work_type ? `<div class="inquiry-meta"><span>Work: ${esc(i.work_type)}</span><span>Duration: ${esc(i.duration||'-')}</span></div>` : ''}
+      ${i.consultation_area ? `<div class="inquiry-meta"><span>Area: ${esc(i.consultation_area)}</span></div>` : ''}
+      ${i.subject ? `<div class="inquiry-meta"><span>Subject: ${esc(i.subject)}</span></div>` : ''}
+      <div class="inquiry-date">${new Date(i.created_at).toLocaleString()}</div>
+    </div>
+  `).join('');
+}
+
+// ===== OPEN INQUIRY DETAIL =====
+async function openInquiry(id) {
+  try {
+    const res = await fetch(`${API}/api/inquiries/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    const i = data.inquiry;
+    const body = document.getElementById('modalBody');
+
+    const rows = [
+      ['Name', i.name], ['Email', i.email], ['Phone', i.phone||'-'],
+      ['Company', i.company||'-'], ['Inquiry Type', i.inquiry_type],
+      ['Project Type', i.project_type], ['Technology', i.technology],
+      ['Budget', i.budget], ['Timeline', i.timeline],
+      ['Work Type', i.work_type], ['Duration', i.duration],
+      ['Consultation Area', i.consultation_area],
+      ['Subject', i.subject], ['Status', i.status],
+      ['Created', new Date(i.created_at).toLocaleString()],
+    ].filter(r => r[1]);
+
+    body.innerHTML = `
+      <h3>${esc(i.name)}</h3>
+      <p style="color:var(--muted);font-size:14px;margin-top:4px;">${esc(i.email)}</p>
+      <div style="margin-top:20px;">
+        ${rows.map(r => `<div class="detail-row"><div class="key">${r[0]}</div><div class="val">${esc(String(r[1]))}</div></div>`).join('')}
+      </div>
+      ${i.problem ? `<div style="margin-top:16px;"><div style="color:var(--muted);font-size:13px;margin-bottom:6px;">Problem</div><div style="font-size:14px;line-height:1.6;">${esc(i.problem)}</div></div>` : ''}
+      <div style="margin-top:16px;"><div style="color:var(--muted);font-size:13px;margin-bottom:6px;">Message</div><div style="font-size:14px;line-height:1.6;">${esc(i.message)}</div></div>
+      <div class="status-select">
+        <button onclick="updateStatus(${i.id},'new')" class="${i.status==='new'?'active':''}">New</button>
+        <button onclick="updateStatus(${i.id},'read')" class="${i.status==='read'?'active':''}">Read</button>
+        <button onclick="updateStatus(${i.id},'replied')" class="${i.status==='replied'?'active':''}">Replied</button>
+        <button onclick="updateStatus(${i.id},'archived')" class="${i.status==='archived'?'active':''}">Archived</button>
+      </div>
+      <button class="delete-btn" onclick="deleteInquiry(${i.id})">Delete Inquiry</button>
+    `;
+    document.getElementById('modalOverlay').classList.add('show');
+  } catch (e) { console.error(e); }
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+// ===== UPDATE STATUS =====
+async function updateStatus(id, status) {
+  try {
+    await fetch(`${API}/api/inquiries/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ status }),
+    });
+    closeModal();
+    await loadStats();
+    await loadInquiries();
+  } catch (e) { alert('Failed to update status'); }
+}
+
+// ===== DELETE INQUIRY =====
+async function deleteInquiry(id) {
+  if (!confirm('Delete this inquiry permanently?')) return;
+  try {
+    await fetch(`${API}/api/inquiries/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    closeModal();
+    await loadStats();
+    await loadInquiries();
+  } catch (e) { alert('Failed to delete'); }
+}
+
+// ===== FILTERS =====
+document.getElementById('filters').addEventListener('click', (e) => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = btn.dataset.type;
+  loadInquiries();
+});
+
+// ===== UTILS =====
+function esc(s) { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
+
+// ===== AUTO LOGIN IF TOKEN EXISTS =====
+(async function init() {
+  if (!token) return;
+  try {
+    const res = await fetch(`${API}/api/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+    if (res.ok) {
+      const data = await res.json();
+      showDashboard(data.admin.username);
+    } else {
+      localStorage.removeItem('ysk_admin_token');
+    }
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>
