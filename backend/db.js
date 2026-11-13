@@ -5,15 +5,41 @@ dotenv.config();
 
 let pool = null;
 
-export function getPool() {
-  if (pool) return pool;
+function getBaseConfig() {
+  const ssl =
+    process.env.DB_SSL === "true"
+      ? { rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== "false" }
+      : undefined;
 
-  pool = mysql.createPool({
+  if (process.env.DATABASE_URL) {
+    const url = new URL(process.env.DATABASE_URL);
+    return {
+      host: url.hostname,
+      port: Number(url.port || 3306),
+      user: decodeURIComponent(url.username),
+      password: decodeURIComponent(url.password),
+      database: url.pathname.replace(/^\//, "") || process.env.DB_NAME || "portfolio_inquiries",
+      ssl,
+      connectTimeout: 10000,
+    };
+  }
+
+  return {
     host: process.env.DB_HOST || "localhost",
     port: Number(process.env.DB_PORT || 3306),
     user: process.env.DB_USER || "root",
     password: process.env.DB_PASSWORD || "",
     database: process.env.DB_NAME || "portfolio_inquiries",
+    ssl,
+    connectTimeout: 10000,
+  };
+}
+
+export function getPool() {
+  if (pool) return pool;
+
+  pool = mysql.createPool({
+    ...getBaseConfig(),
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
@@ -25,20 +51,19 @@ export function getPool() {
 
 export async function initDatabase() {
   // First connect without database to create it if it doesn't exist
-  const conn = await mysql.createConnection({
-    host: process.env.DB_HOST || "localhost",
-    port: Number(process.env.DB_PORT || 3306),
-    user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "",
-  });
+  const { database: dbName, ...serverConfig } = getBaseConfig();
+  const conn = await mysql.createConnection(serverConfig);
 
-  const dbName = process.env.DB_NAME || "portfolio_inquiries";
-
-  await conn.query(
-    `CREATE DATABASE IF NOT EXISTS \`${dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
-  );
-
-  await conn.end();
+  try {
+    await conn.query(
+      `CREATE DATABASE IF NOT EXISTS \`${dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
+    );
+  } catch (createErr) {
+    // Managed MySQL hosts often pre-create the DB and deny CREATE DATABASE
+    console.log(`  (skipping CREATE DATABASE: ${createErr.code || createErr.message})`);
+  } finally {
+    await conn.end();
+  }
 
   const p = getPool();
 

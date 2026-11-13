@@ -16,6 +16,8 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const dbState = { connected: false, error: null };
+
 // CORS - allow frontend
 const allowedOrigins = [
   process.env.FRONTEND_URL || "http://localhost:5173",
@@ -53,8 +55,17 @@ app.get("/api/health", (req, res) => {
     status: "ok",
     message: "Portfolio backend is running",
     port: PORT,
-    database: "portfolio_inquiries",
+    database: dbState.connected ? "connected" : "disconnected",
+    databaseError: dbState.error,
   });
+});
+
+// Block DB-backed routes until the database is ready
+app.use(["/api/auth", "/api/contact", "/api/inquiries"], (req, res, next) => {
+  if (!dbState.connected) {
+    return res.status(503).json({ error: "Database not available, please try again shortly" });
+  }
+  next();
 });
 
 // Routes
@@ -97,62 +108,62 @@ function printBanner(port, dbStatus) {
   console.log("");
 }
 
-async function startServer(attempt = 0) {
-  const MAX_ATTEMPTS = 3;
+async function connectDatabase(attempt = 1) {
+  const RETRY_MS = Math.min(30000, 2000 * attempt);
 
   try {
-    // 1. Initialize database
-    console.log("\n  [1/3] Connecting to MySQL database...");
+    console.log(`\n  [2/3] Connecting to MySQL database... (attempt ${attempt})`);
     await initDatabase();
 
-    // 2. Verify database connection with a test query
     const pool = getPool();
     const [rows] = await pool.query("SELECT COUNT(*) as count FROM inquiries");
     const inquiryCount = rows[0].count;
-    console.log(`  [2/3] Database connected: portfolio_inquiries (${inquiryCount} inquiries)`);
 
-    // 3. Start server
-    const server = app.listen(PORT, () => {
-      console.log(`  [3/3] Server started on port ${PORT}`);
-      printBanner(PORT, `portfolio_inquiries OK (${inquiryCount} rows)`);
-    });
-
-    server.on("error", (err) => {
-      if (err.code === "EADDRINUSE") {
-        if (attempt < MAX_ATTEMPTS) {
-          console.log(`\n  ⚠  Port ${PORT} busy, retrying in 3 seconds... (attempt ${attempt + 1}/${MAX_ATTEMPTS})`);
-          setTimeout(() => startServer(attempt + 1), 3000);
-        } else {
-          console.error(`\n  ✗  Port ${PORT} still in use after ${MAX_ATTEMPTS} attempts.`);
-          console.error(`     Run on a different port:  $env:PORT=5001; npm run server\n`);
-          process.exit(1);
-        }
-      } else {
-        console.error("Server error:", err);
-        process.exit(1);
-      }
-    });
-
-    // Graceful shutdown
-    const shutdown = (signal) => {
-      console.log(`\n  ${signal} received. Shutting down gracefully...`);
-      server.close(() => {
-        console.log("  Server closed. Goodbye!\n");
-        process.exit(0);
-      });
-    };
-    process.on("SIGINT", () => shutdown("SIGINT"));
-    process.on("SIGTERM", () => shutdown("SIGTERM"));
+    dbState.connected = true;
+    dbState.error = null;
+    console.log(`  [3/3] Database connected (${inquiryCount} inquiries)`);
+    printBanner(PORT, `OK (${inquiryCount} rows)`);
   } catch (err) {
-    console.error("\n  ✗  Startup failed:", err.message);
+    dbState.connected = false;
+    dbState.error = err.code || err.message;
+    console.error("  ✗  Database connection failed:", err.code || "", err.message);
     if (err.code === "ER_ACCESS_DENIED_ERROR") {
-      console.error("     Check DB_PASSWORD in .env file");
-    } else if (err.code === "ECONNREFUSED") {
-      console.error("     MySQL service is not running. Start it: net start MySQL80");
+      console.error("     Check DB_USER / DB_PASSWORD environment variables");
+    } else if (err.code === "ECONNREFUSED" || err.code === "ENOTFOUND" || err.code === "ETIMEDOUT") {
+      console.error(
+        `     Cannot reach MySQL at ${process.env.DATABASE_URL ? "DATABASE_URL" : `${process.env.DB_HOST || "localhost"}:${process.env.DB_PORT || 3306}`}.` +
+          " Set DATABASE_URL or DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME to a reachable MySQL server."
+      );
     }
-    console.error("");
-    process.exit(1);
+    console.error(`     Retrying in ${RETRY_MS / 1000}s...`);
+    setTimeout(() => connectDatabase(attempt + 1), RETRY_MS);
   }
+}
+
+function startServer() {
+  const server = app.listen(PORT, "0.0.0.0", () => {
+    console.log(`\n  [1/3] Server started on port ${PORT}`);
+    connectDatabase();
+  });
+
+  server.on("error", (err) => {
+    if (err.code === "EADDRINUSE") {
+      console.error(`\n  ✗  Port ${PORT} is already in use. Set a different PORT env variable.\n`);
+    } else {
+      console.error("Server error:", err);
+    }
+    process.exit(1);
+  });
+
+  const shutdown = (signal) => {
+    console.log(`\n  ${signal} received. Shutting down gracefully...`);
+    server.close(() => {
+      console.log("  Server closed. Goodbye!\n");
+      process.exit(0);
+    });
+  };
+  process.on("SIGINT", () => shutdown("SIGINT"));
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
 }
 
 startServer();
