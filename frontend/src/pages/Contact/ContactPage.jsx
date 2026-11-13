@@ -14,6 +14,7 @@ import {
   FiX,
   FiAlertCircle,
 } from "react-icons/fi";
+import { API_BASE_URL } from "../../config/api";
 
 const inquiryTypes = [
   {
@@ -570,7 +571,7 @@ export default function ContactPage() {
 
     try {
       const response = await fetch(
-        "/api/contact/inquiry",
+        `${API_BASE_URL}/api/contact/inquiry`,
         {
           method: "POST",
           headers: {

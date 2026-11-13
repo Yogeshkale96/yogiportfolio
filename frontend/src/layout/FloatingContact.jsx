@@ -13,6 +13,7 @@ import {
   FiAlertCircle,
 } from "react-icons/fi";
 import { contactInfo } from "../data/socialLinks";
+import { API_BASE_URL } from "../config/api";
 
 /* =====================================================
    FLOATING CONTACT WIDGET
@@ -111,7 +112,7 @@ export default function FloatingContact() {
 
     setStatus("submitting");
     try {
-      const res = await fetch("/api/contact/inquiry", {
+      const res = await fetch(`${API_BASE_URL}/api/contact/inquiry`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

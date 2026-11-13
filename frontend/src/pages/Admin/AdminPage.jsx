@@ -19,8 +19,9 @@ import {
   FiPhone,
 } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
+import { API_BASE_URL } from "../../config/api";
 
-const API = "";
+const API = API_BASE_URL;
 
 const INQUIRY_TYPE_META = {
   project: { label: "Project", icon: FiBriefcase, color: "violet" },
